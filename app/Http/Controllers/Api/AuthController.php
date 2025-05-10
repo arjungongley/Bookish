@@ -247,4 +247,47 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/me",
+     *     summary="Get authenticated user information",
+     *     tags={"Authentication"},
+     *     security={{ "bearerAuth": {} }},
+     *     @OA\Response(
+     *         response=200,
+     *         description="User information retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="user", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     */
+    public function me(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthenticated',
+                ], 401);
+            }
+            
+            return response()->json([
+                'status' => 'success',
+                'user' => $user
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve user information',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
